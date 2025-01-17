@@ -18,6 +18,7 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictExce
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.MethodNotAllowedException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.NotFoundException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.SerDesException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -42,7 +43,7 @@ public class ExceptionHandlerConfig {
      * @param request request.
      * @return error response to return.
      */
-    @ExceptionHandler(value = {InternalServerErrorException.class, Exception.class})
+    @ExceptionHandler(value = {InternalServerErrorException.class, Exception.class, SerDesException.class})
     public ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
         LOGGER.error(String.format("Unexpected exception, response code: %s",
                 HttpStatus.INTERNAL_SERVER_ERROR), ex);
