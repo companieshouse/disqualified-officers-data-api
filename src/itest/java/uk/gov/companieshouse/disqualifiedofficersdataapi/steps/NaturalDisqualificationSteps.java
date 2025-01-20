@@ -3,6 +3,7 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -76,6 +77,20 @@ public class NaturalDisqualificationSteps {
         naturalDisqualification.setData(natData);
         naturalDisqualification.setId(officerId);
         naturalDisqualification.setDeltaAt("20230925171003950844");
+
+        mongoTemplate.save(naturalDisqualification);
+        natData.setKind(KindEnum.NATURAL_DISQUALIFICATION);
+        CucumberContext.CONTEXT.set("disqualificationData", natData);
+    }
+
+    @And("the natural disqualified officer information exists for {string} with delta_at {string}")
+    public void the_natural_disqualification_information_exists_for_with_delta_at(String officerId, String deltaAt) throws IOException {
+        File natFile = new ClassPathResource("/json/output/retrieve_natural_disqualified_officer.json").getFile();
+        NaturalDisqualificationApi natData = objectMapper.readValue(natFile, NaturalDisqualificationApi.class);
+        NaturalDisqualificationDocument naturalDisqualification = new NaturalDisqualificationDocument();
+        naturalDisqualification.setData(natData);
+        naturalDisqualification.setId(officerId);
+        naturalDisqualification.setDeltaAt(deltaAt);
 
         mongoTemplate.save(naturalDisqualification);
         natData.setKind(KindEnum.NATURAL_DISQUALIFICATION);

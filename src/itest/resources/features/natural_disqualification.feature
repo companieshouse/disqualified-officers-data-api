@@ -22,3 +22,14 @@ Feature: Process natural disqualified officer information
     Examples:
       | officerId     | result                                    |
       | 1234567890    | retrieve_natural_disqualified_officer     |
+
+  Scenario Outline: Processing natural disqualified officer with stale delta_at returns 409
+
+    Given disqualified officers data api service is running
+    And the natural disqualified officer information exists for "<officer_id>" with delta_at "<delta_at>"
+    When I send natural PUT request with payload "<data>" file
+    Then I should receive 409 status code
+
+    Examples:
+      | officer_id | delta_at             | data                         |
+      | 1234567890 | 20500405155100786000 | natural_disqualified_officer |
