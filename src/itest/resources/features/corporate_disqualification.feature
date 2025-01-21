@@ -29,6 +29,8 @@ Feature: Process corporate disqualified officer information
     And the corporate disqualified officer information exists for "<officer_id>" with delta_at "<delta_at>"
     When I send corporate PUT request with payload "<data>" file
     Then I should receive 409 status code
+    And the corporate record with id "<officer_id>" is unchanged
+    And the CHS Kafka API is not invoked
 
     Examples:
       | officer_id | delta_at             | data                           |

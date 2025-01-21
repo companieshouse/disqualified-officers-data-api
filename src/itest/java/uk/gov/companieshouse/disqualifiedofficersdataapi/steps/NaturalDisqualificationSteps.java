@@ -7,6 +7,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
@@ -93,7 +94,6 @@ public class NaturalDisqualificationSteps {
         naturalDisqualification.setDeltaAt(deltaAt);
 
         mongoTemplate.save(naturalDisqualification);
-        natData.setKind(KindEnum.NATURAL_DISQUALIFICATION);
         CucumberContext.CONTEXT.set("disqualificationData", natData);
     }
 
@@ -171,6 +171,13 @@ public class NaturalDisqualificationSteps {
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
         assertThat(expected.getDateOfBirth()).isEqualTo(actual.getDateOfBirth());
         assertThat(expected.getKind()).isEqualTo(actual.getKind());
+    }
+
+    @And("the natural record with id {string} is unchanged")
+    public void the_natural_record_with_id_is_unchanged(String officerId) {
+        NaturalDisqualificationApi actual = naturalRepository.findById(officerId).get().getData();
+        NaturalDisqualificationApi expected = CucumberContext.CONTEXT.get("disqualificationData");
+        Assertions.assertEquals(expected, actual);
     }
 
     @After

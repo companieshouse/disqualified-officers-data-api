@@ -7,6 +7,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
@@ -92,6 +93,7 @@ public class CorporateDisqualificationSteps {
         corporateDisqualification.setDeltaAt(deltaAt);
 
         mongoTemplate.save(corporateDisqualification);
+        CucumberContext.CONTEXT.set("disqualificationData",corpData);
     }
 
     @When("I send corporate GET request with officer Id {string}")
@@ -146,6 +148,13 @@ public class CorporateDisqualificationSteps {
         assertThat(expected.getName()).isEqualTo(actual.getName());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
         assertThat(expected.getKind()).isEqualTo(actual.getKind());
+    }
+
+    @And("the corporate record with id {string} is unchanged")
+    public void the_corporate_record_with_id_is_unchanged(String officerId) {
+        CorporateDisqualificationApi actual = corporateRepository.findById(officerId).get().getData();
+        CorporateDisqualificationApi expected = CucumberContext.CONTEXT.get("disqualificationData");
+        Assertions.assertEquals(expected, actual);
     }
 
     @After
