@@ -59,8 +59,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public Function<ResourceChangedRequest, ChangedResource> mapper() {
-        ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(timestampGenerator(), objectMapper());
+    public Function<ResourceChangedRequest, ChangedResource> mapper(ObjectMapper objectMapper) {
+        ResourceChangedRequestMapper mapper = new ResourceChangedRequestMapper(timestampGenerator(), objectMapper);
         return mapper::mapChangedResource;
     }
 
