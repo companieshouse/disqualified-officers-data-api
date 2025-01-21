@@ -25,6 +25,7 @@ import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.Created;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
@@ -174,8 +175,9 @@ class DisqualifiedOfficerServiceTest {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(deltaAtHandler.isRequestStale(any(OffsetDateTime.class), any())).thenReturn(true);
 
-        service.processNaturalDisqualification("", OFFICER_ID, request);
+        Executable actual = () -> service.processNaturalDisqualification("", OFFICER_ID, request);
 
+        assertThrows(ConflictException.class, actual);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(transformer);
         verifyNoInteractions(disqualifiedOfficerApiService);
@@ -254,8 +256,9 @@ class DisqualifiedOfficerServiceTest {
         when(repository.findById(OFFICER_ID)).thenReturn(Optional.of(document));
         when(deltaAtHandler.isRequestStale(any(OffsetDateTime.class), any())).thenReturn(true);
 
-        service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
+        Executable actual = () -> service.processCorporateDisqualification("", OFFICER_ID, corpRequest);
 
+        assertThrows(ConflictException.class, actual);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(transformer);
         verifyNoInteractions(disqualifiedOfficerApiService);

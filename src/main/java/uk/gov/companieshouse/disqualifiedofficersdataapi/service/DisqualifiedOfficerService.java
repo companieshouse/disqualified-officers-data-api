@@ -10,6 +10,7 @@ import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificatio
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadGatewayException;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ConflictException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.NotFoundException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
@@ -68,7 +69,8 @@ public class DisqualifiedOfficerService {
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.NATURAL,
                     existingDocument.orElse(null));
         } else {
-            LOGGER.info(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
+            LOGGER.error(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
+            throw new ConflictException(STALE_DELTA_AT_MESSAGE);
         }
     }
 
@@ -91,7 +93,8 @@ public class DisqualifiedOfficerService {
             saveAndCallChsKafka(contextId, officerId, document, DisqualificationResourceType.CORPORATE,
                     existingDocument.orElse(null));
         } else {
-            LOGGER.info(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
+            LOGGER.error(STALE_DELTA_AT_MESSAGE, DataMapHolder.getLogMap());
+            throw new ConflictException(STALE_DELTA_AT_MESSAGE);
         }
     }
 

@@ -3,9 +3,11 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
@@ -82,6 +84,19 @@ public class NaturalDisqualificationSteps {
         CucumberContext.CONTEXT.set("disqualificationData", natData);
     }
 
+    @And("the natural disqualified officer information exists for {string} with delta_at {string}")
+    public void the_natural_disqualification_information_exists_for_with_delta_at(String officerId, String deltaAt) throws IOException {
+        File natFile = new ClassPathResource("/json/output/retrieve_natural_disqualified_officer.json").getFile();
+        NaturalDisqualificationApi natData = objectMapper.readValue(natFile, NaturalDisqualificationApi.class);
+        NaturalDisqualificationDocument naturalDisqualification = new NaturalDisqualificationDocument();
+        naturalDisqualification.setData(natData);
+        naturalDisqualification.setId(officerId);
+        naturalDisqualification.setDeltaAt(deltaAt);
+
+        mongoTemplate.save(naturalDisqualification);
+        CucumberContext.CONTEXT.set("disqualificationData", naturalDisqualification);
+    }
+
     @When("I send natural GET request with officer Id {string}")
     public void i_send_natural_get_request_with_officer_id(String officerId) {
         String uri = "/disqualified-officers/natural/{officerId}";
@@ -156,6 +171,16 @@ public class NaturalDisqualificationSteps {
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
         assertThat(expected.getDateOfBirth()).isEqualTo(actual.getDateOfBirth());
         assertThat(expected.getKind()).isEqualTo(actual.getKind());
+    }
+
+    @And("the natural record with id {string} is unchanged")
+    public void the_natural_record_with_id_is_unchanged(String officerId) {
+        NaturalDisqualificationDocument actual = naturalRepository.findById(officerId).get();
+        NaturalDisqualificationDocument expected = CucumberContext.CONTEXT.get("disqualificationData");
+
+        Assertions.assertEquals(expected.getData(), actual.getData());
+        Assertions.assertEquals(expected.getDeltaAt(), actual.getDeltaAt());
+        Assertions.assertEquals(expected.getId(), actual.getId());
     }
 
     @After

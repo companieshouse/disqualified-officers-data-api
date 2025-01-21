@@ -3,9 +3,11 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
@@ -80,6 +82,20 @@ public class CorporateDisqualificationSteps {
         mongoTemplate.save(corporateDisqualification);
     }
 
+    @And("the corporate disqualified officer information exists for {string} with delta_at {string}")
+    public void the_disqualification_information_exists_for_with_delta_at(String officerId, String deltaAt) throws IOException {
+        File corpFile = new ClassPathResource("/json/output/retrieve_corporate_disqualified_officer.json").getFile();
+        CorporateDisqualificationApi corpData = objectMapper.readValue(corpFile, CorporateDisqualificationApi.class);
+        CorporateDisqualificationDocument corporateDisqualification = new CorporateDisqualificationDocument();
+        corporateDisqualification.setData(corpData);
+        corporateDisqualification.setId(officerId);
+        corporateDisqualification.setCorporateOfficer(true);
+        corporateDisqualification.setDeltaAt(deltaAt);
+
+        mongoTemplate.save(corporateDisqualification);
+        CucumberContext.CONTEXT.set("disqualificationData",corporateDisqualification);
+    }
+
     @When("I send corporate GET request with officer Id {string}")
     public void i_send_corporate_get_request_with_officer_id(String officerId) {
         String uri = "/disqualified-officers/corporate/{officerId}";
@@ -112,7 +128,7 @@ public class CorporateDisqualificationSteps {
         headers.set("ERIC-Identity-Type", "KEY");
         headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
 
-        HttpEntity request = new HttpEntity(data, headers);
+        HttpEntity<String> request = new HttpEntity<>(data, headers);
         String uri = "/disqualified-officers/corporate/{officerId}/internal";
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.CORPORATE);
         String officerId = "1234567891";
@@ -132,6 +148,17 @@ public class CorporateDisqualificationSteps {
         assertThat(expected.getName()).isEqualTo(actual.getName());
         assertThat(expected.getDisqualifications()).isEqualTo(actual.getDisqualifications());
         assertThat(expected.getKind()).isEqualTo(actual.getKind());
+    }
+
+    @And("the corporate record with id {string} is unchanged")
+    public void the_corporate_record_with_id_is_unchanged(String officerId) {
+        CorporateDisqualificationDocument actual = corporateRepository.findById(officerId).get();
+        CorporateDisqualificationDocument expected = CucumberContext.CONTEXT.get("disqualificationData");
+
+        Assertions.assertEquals(expected.getData(), actual.getData());
+        Assertions.assertEquals(expected.getDeltaAt(), actual.getDeltaAt());
+        Assertions.assertEquals(expected.getId(), actual.getId());
+        Assertions.assertEquals(expected.isCorporateOfficer(), actual.isCorporateOfficer());
     }
 
     @After
