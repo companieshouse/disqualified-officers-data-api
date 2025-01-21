@@ -24,7 +24,6 @@ import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
-import uk.gov.companieshouse.disqualifiedofficersdataapi.TestHelper;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.SerDesException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 
@@ -35,11 +34,11 @@ class ResourceChangedRequestMapperTest {
     private static final String DATE = "date";
     private static final String OFFICER_ID = "CH4000056";
 
-    private static final CorporateDisqualificationApi CORPORATE_DISQ = TestHelper.createPopulatedCorporateDisqualification();
-    private static final NaturalDisqualificationApi NATURAL_DISQ = TestHelper.createPopulatedNaturalDisqualification();
+    private static final CorporateDisqualificationApi corporateDsq = new CorporateDisqualificationApi();
+    private static final NaturalDisqualificationApi naturalDsq = new NaturalDisqualificationApi();
 
-    private static final Object corporateDisqMapped = new Object();
-    private static final Object naturalDisqMapped = new Object();
+    private static final Object corporateDsqMapped = new Object();
+    private static final Object naturalDsqMapped = new Object();
 
     @Mock
     private Supplier<String> timestampGenerator;
@@ -170,23 +169,23 @@ class ResourceChangedRequestMapperTest {
                         .build(),
                 ResourceChangedTestArgument.builder()
                         .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
-                                DisqualificationResourceType.CORPORATE, CORPORATE_DISQ, true))
+                                DisqualificationResourceType.CORPORATE, corporateDsq, true))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/corporate/CH4000056")
                         .withResourceKind("disqualified-officer-corporate")
                         .withEventType("deleted")
                         .withEventPublishedAt(DATE)
-                        .withDeletedData(corporateDisqMapped)
+                        .withDeletedData(corporateDsqMapped)
                         .build(),
                 ResourceChangedTestArgument.builder()
                         .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
-                                DisqualificationResourceType.NATURAL, NATURAL_DISQ, true))
+                                DisqualificationResourceType.NATURAL, naturalDsq, true))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/natural/CH4000056")
                         .withResourceKind("disqualified-officer-natural")
                         .withEventType("deleted")
                         .withEventPublishedAt(DATE)
-                        .withDeletedData(naturalDisqMapped)
+                        .withDeletedData(naturalDsqMapped)
                         .build()
         );
     }
