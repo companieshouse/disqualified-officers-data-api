@@ -93,7 +93,7 @@ public class CorporateDisqualificationSteps {
         corporateDisqualification.setDeltaAt(deltaAt);
 
         mongoTemplate.save(corporateDisqualification);
-        CucumberContext.CONTEXT.set("disqualificationData",corpData);
+        CucumberContext.CONTEXT.set("disqualificationData",corporateDisqualification);
     }
 
     @When("I send corporate GET request with officer Id {string}")
@@ -152,9 +152,13 @@ public class CorporateDisqualificationSteps {
 
     @And("the corporate record with id {string} is unchanged")
     public void the_corporate_record_with_id_is_unchanged(String officerId) {
-        CorporateDisqualificationApi actual = corporateRepository.findById(officerId).get().getData();
-        CorporateDisqualificationApi expected = CucumberContext.CONTEXT.get("disqualificationData");
-        Assertions.assertEquals(expected, actual);
+        CorporateDisqualificationDocument actual = corporateRepository.findById(officerId).get();
+        CorporateDisqualificationDocument expected = CucumberContext.CONTEXT.get("disqualificationData");
+
+        Assertions.assertEquals(expected.getData(), actual.getData());
+        Assertions.assertEquals(expected.getDeltaAt(), actual.getDeltaAt());
+        Assertions.assertEquals(expected.getId(), actual.getId());
+        Assertions.assertEquals(expected.isCorporateOfficer(), actual.isCorporateOfficer());
     }
 
     @After

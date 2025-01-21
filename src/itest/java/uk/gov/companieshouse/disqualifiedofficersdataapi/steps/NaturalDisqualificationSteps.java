@@ -94,7 +94,7 @@ public class NaturalDisqualificationSteps {
         naturalDisqualification.setDeltaAt(deltaAt);
 
         mongoTemplate.save(naturalDisqualification);
-        CucumberContext.CONTEXT.set("disqualificationData", natData);
+        CucumberContext.CONTEXT.set("disqualificationData", naturalDisqualification);
     }
 
     @When("I send natural GET request with officer Id {string}")
@@ -175,9 +175,12 @@ public class NaturalDisqualificationSteps {
 
     @And("the natural record with id {string} is unchanged")
     public void the_natural_record_with_id_is_unchanged(String officerId) {
-        NaturalDisqualificationApi actual = naturalRepository.findById(officerId).get().getData();
-        NaturalDisqualificationApi expected = CucumberContext.CONTEXT.get("disqualificationData");
-        Assertions.assertEquals(expected, actual);
+        NaturalDisqualificationDocument actual = naturalRepository.findById(officerId).get();
+        NaturalDisqualificationDocument expected = CucumberContext.CONTEXT.get("disqualificationData");
+
+        Assertions.assertEquals(expected.getData(), actual.getData());
+        Assertions.assertEquals(expected.getDeltaAt(), actual.getDeltaAt());
+        Assertions.assertEquals(expected.getId(), actual.getId());
     }
 
     @After
