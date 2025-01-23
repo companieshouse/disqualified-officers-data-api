@@ -2,11 +2,16 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -19,6 +24,7 @@ import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.SerDesException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +32,13 @@ class ResourceChangedRequestMapperTest {
 
     private static final String EXPECTED_CONTEXT_ID = "35234234";
     private static final String DATE = "date";
+    private static final String OFFICER_ID = "CH4000056";
+
+    private static final CorporateDisqualificationApi corporateDsq = new CorporateDisqualificationApi();
+    private static final NaturalDisqualificationApi naturalDsq = new NaturalDisqualificationApi();
+
+    private static final Object corporateDsqMapped = new Object();
+    private static final Object naturalDsqMapped = new Object();
 
     @Mock
     private Supplier<String> timestampGenerator;
@@ -33,12 +46,15 @@ class ResourceChangedRequestMapperTest {
     @Mock
     private ResourceChangedRequest request;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     @InjectMocks
     private ResourceChangedRequestMapper mapper;
 
     @ParameterizedTest
     @MethodSource("resourceChangedScenarios")
-    void testMapper(ResourceChangedTestArgument argument) {
+    void testMapperChanged(ResourceChangedTestArgument argument) {
         // given
         when(timestampGenerator.get()).thenReturn(DATE);
 
@@ -47,6 +63,24 @@ class ResourceChangedRequestMapperTest {
 
         // then
         assertEquals(argument.getChangedResource(), actual);
+    }
+
+    @ParameterizedTest
+    @MethodSource("resourceDeletedScenarios")
+    void testMapperDeleted(ResourceChangedTestArgument argument) throws Exception {
+        // given
+        String serialisedData = "serialisedData";
+        when(timestampGenerator.get()).thenReturn(DATE);
+        when(objectMapper.writeValueAsString(any())).thenReturn(serialisedData);
+        when(objectMapper.readValue(anyString(), eq(Object.class))).thenReturn(argument.getChangedResource().getDeletedData());
+
+        // when
+        ChangedResource actual = mapper.mapChangedResource(argument.getRequest());
+
+        // then
+        assertEquals(argument.getChangedResource(), actual);
+        verify(objectMapper).writeValueAsString(argument.getRequest().getDisqualificationData());
+        verify(objectMapper).readValue(serialisedData, Object.class);
     }
 
     @Test
@@ -59,10 +93,40 @@ class ResourceChangedRequestMapperTest {
         assertEquals("Unknown disqualification type", expectedException.getMessage());
     }
 
+    @Test
+    void testMapperThrowsSerDesExceptionIfObjectMapperWriteFails() throws Exception {
+        // given
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+
+        // when
+        Executable actual = () -> mapper.mapChangedResource(
+                new ResourceChangedRequest(EXPECTED_CONTEXT_ID, OFFICER_ID, DisqualificationResourceType.NATURAL, null,
+                        true));
+
+        // then
+        assertThrows(SerDesException.class, actual);
+    }
+
+    @Test
+    void testMapperThrowsSerDesExceptionIfObjectMapperReadFails() throws Exception {
+        // given
+        when(objectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
+        when(objectMapper.readValue(anyString(), eq(Object.class))).thenThrow(JsonProcessingException.class);
+
+        // when
+        Executable actual = () -> mapper.mapChangedResource(
+                new ResourceChangedRequest(EXPECTED_CONTEXT_ID, OFFICER_ID, DisqualificationResourceType.NATURAL, null,
+                        true));
+
+        // then
+        assertThrows(SerDesException.class, actual);
+    }
+
     static Stream<ResourceChangedTestArgument> resourceChangedScenarios() {
         return Stream.of(
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, null, false))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
+                                DisqualificationResourceType.NATURAL, null, false))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/natural/CH4000056")
                         .withResourceKind("disqualified-officer-natural")
@@ -70,35 +134,64 @@ class ResourceChangedRequestMapperTest {
                         .withEventPublishedAt(DATE)
                         .build(),
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, null, false))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
+                                DisqualificationResourceType.CORPORATE, null, false))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/corporate/CH4000056")
                         .withResourceKind("disqualified-officer-corporate")
                         .withEventType("changed")
                         .withEventPublishedAt(DATE)
-                        .build(),
+                        .build()
+        );
+    }
+
+    static Stream<ResourceChangedTestArgument> resourceDeletedScenarios() {
+        return Stream.of(
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.CORPORATE, new CorporateDisqualificationApi(), true))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
+                                DisqualificationResourceType.CORPORATE, null, true))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/corporate/CH4000056")
                         .withResourceKind("disqualified-officer-corporate")
                         .withEventType("deleted")
                         .withEventPublishedAt(DATE)
-                        .withDeletedData(new CorporateDisqualificationApi())
+                        .withDeletedData(null)
                         .build(),
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056", DisqualificationResourceType.NATURAL, new NaturalDisqualificationApi(), true))
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
+                                DisqualificationResourceType.NATURAL, null, true))
                         .withContextId(EXPECTED_CONTEXT_ID)
                         .withResourceUri("/disqualified-officers/natural/CH4000056")
                         .withResourceKind("disqualified-officer-natural")
                         .withEventType("deleted")
                         .withEventPublishedAt(DATE)
-                        .withDeletedData(new NaturalDisqualificationApi())
+                        .withDeletedData(null)
+                        .build(),
+                ResourceChangedTestArgument.builder()
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
+                                DisqualificationResourceType.CORPORATE, corporateDsq, true))
+                        .withContextId(EXPECTED_CONTEXT_ID)
+                        .withResourceUri("/disqualified-officers/corporate/CH4000056")
+                        .withResourceKind("disqualified-officer-corporate")
+                        .withEventType("deleted")
+                        .withEventPublishedAt(DATE)
+                        .withDeletedData(corporateDsqMapped)
+                        .build(),
+                ResourceChangedTestArgument.builder()
+                        .withRequest(new ResourceChangedRequest(EXPECTED_CONTEXT_ID, "CH4000056",
+                                DisqualificationResourceType.NATURAL, naturalDsq, true))
+                        .withContextId(EXPECTED_CONTEXT_ID)
+                        .withResourceUri("/disqualified-officers/natural/CH4000056")
+                        .withResourceKind("disqualified-officer-natural")
+                        .withEventType("deleted")
+                        .withEventPublishedAt(DATE)
+                        .withDeletedData(naturalDsqMapped)
                         .build()
         );
     }
 
     static class ResourceChangedTestArgument {
+
         private final ResourceChangedRequest request;
         private final ChangedResource changedResource;
 
@@ -126,6 +219,7 @@ class ResourceChangedRequestMapperTest {
     }
 
     static class ResourceChangedTestArgumentBuilder {
+
         private ResourceChangedRequest request;
         private String resourceUri;
         private String resourceKind;
