@@ -12,7 +12,7 @@
     <version>unversioned</version>
     <name>disqualified-officers-data-api</name>
     <description>Service handling CRUD functions for officer disqualifications</description>
-    <!-- Temp change to test sbom changes-->
+
     <properties>
         <java.version>21</java.version>
         <start-class>
