@@ -20,7 +20,11 @@
         </start-class>
 
         <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring.boot.version>3.4.1</spring.boot.version>
+
+        <spring-boot-starter.version>3.4.5</spring-boot-starter.version>
+        <spring-boot-dependencies.version>${spring-boot-starter.version}</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>${spring-boot-starter.version}</spring-boot-maven-plugin.version>
+
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -46,14 +50,28 @@
             ${project.basedir}/target/site/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
+        <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
+        <sonar.login></sonar.login>
+        <sonar.password></sonar.password>
+        <sonar.projectName>disqualified-officers-data-api</sonar.projectName>
+        <sonar.projectKey>uk.gov.companieshouse:disqualified-officers-data-api</sonar.projectKey>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>sonar-pr-analysis</id>
+            <properties>
+                <sonar.pullrequest.base>main</sonar.pullrequest.base>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring-boot-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -206,7 +224,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring-boot-maven-plugin.version}</version>
                 <configuration>
                     <mainClass>${start-class}</mainClass>
                 </configuration>
