@@ -23,6 +23,7 @@
 
         <spring-boot-starter.version>3.4.5</spring-boot-starter.version>
         <spring-context.version>6.2.7</spring-context.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -90,6 +91,11 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
                 <version>${spring-context.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
