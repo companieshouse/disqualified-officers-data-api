@@ -20,7 +20,6 @@
         </start-class>
 
         <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-
         <spring-boot-starter.version>3.4.5</spring-boot-starter.version>
         <spring-context.version>6.2.7</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
@@ -251,7 +250,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring-boot-starter.version}</version>
                 <configuration>
                     <mainClass>${start-class}</mainClass>
                 </configuration>
