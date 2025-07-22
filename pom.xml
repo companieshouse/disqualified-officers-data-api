@@ -19,30 +19,33 @@
             uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication
         </start-class>
 
-        <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring-boot-starter.version>3.4.5</spring-boot-starter.version>
+        <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
+        <spring-boot-starter.version>3.5.3</spring-boot-starter.version>
         <spring-context.version>6.2.7</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <tomcat-embed-core.version>11.0.7</tomcat-embed-core.version>
+        <tomcat-embed-core.version>11.0.8</tomcat-embed-core.version>
         <spring-web.version>6.2.8</spring-web.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <opentelemetry-instrumentation-bom.version>2.14.0</opentelemetry-instrumentation-bom.version>
+        <apache-commons-lang3.version>3.18.0</apache-commons-lang3.version>
+        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
 
         <!-- tests -->
-        <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
-        <io-cucumber.version>7.20.1</io-cucumber.version>
-        <test-containers.version>1.20.4</test-containers.version>
+        <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
+        <io-cucumber.version>7.23.0</io-cucumber.version>
+        <test-containers.version>1.21.2</test-containers.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.23</structured-logging.version>
-        <private-api-sdk-java.version>4.0.258</private-api-sdk-java.version>
-        <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
+        <structured-logging.version>3.0.36</structured-logging.version>
+        <private-api-sdk-java.version>4.0.316</private-api-sdk-java.version>
+        <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
         <api-helper-java.version>3.0.1</api-helper-java.version>
         <api-security-java.version>2.0.8</api-security-java.version>
 
@@ -52,8 +55,8 @@
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
-        <sonar.login></sonar.login>
-        <sonar.password></sonar.password>
+        <sonar.login/>
+        <sonar.password/>
         <sonar.projectName>disqualified-officers-data-api</sonar.projectName>
         <sonar.projectKey>uk.gov.companieshouse:disqualified-officers-data-api</sonar.projectKey>
     </properties>
@@ -108,6 +111,13 @@
                 <artifactId>spring-web</artifactId>
                 <version>${spring-web.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom</artifactId>
+                <version>${opentelemetry-instrumentation-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -131,6 +141,10 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -150,6 +164,10 @@
                     <artifactId>log4j-to-slf4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -186,6 +204,12 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-helper-java</artifactId>
             <version>${api-helper-java.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
@@ -242,6 +266,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${apache-commons-lang3.version}</version>
         </dependency>
     </dependencies>
 
