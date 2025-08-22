@@ -23,7 +23,7 @@
         <spring-boot-starter.version>3.5.3</spring-boot-starter.version>
         <spring-context.version>6.2.7</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <tomcat-embed-core.version>11.0.8</tomcat-embed-core.version>
+        <tomcat-embed-core.version>11.0.10</tomcat-embed-core.version>
         <spring-web.version>6.2.8</spring-web.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
