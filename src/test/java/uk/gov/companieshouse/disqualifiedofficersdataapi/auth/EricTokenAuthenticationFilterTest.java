@@ -44,7 +44,7 @@ class EricTokenAuthenticationFilterTest {
         "PUT Request with OAUTH2 type fails,OAUTH2,PUT,0",
         "PUT Request with KEY type with no privileges fails,KEY,PUT,0" 
         })
-    void doFilterInterna(String name, String ericIdentityType, String requestMethod, int filterChainTimes) throws ServletException, IOException {
+    void doFilterInternal(String name, String ericIdentityType, String requestMethod, int filterChainTimes) throws ServletException, IOException {
 
         when(request.getHeader("ERIC-Identity")).thenReturn("SOME-IDENTITY");
         when(request.getHeader("ERIC-Identity-Type")).thenReturn(ericIdentityType);
