@@ -5,6 +5,7 @@ import com.mongodb.BasicDBObject;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
 
 @WritingConverter
 public class DisqualifiedCorporateOfficerWriteConverter implements Converter<CorporateDisqualificationApi, BasicDBObject> {
@@ -25,7 +26,7 @@ public class DisqualifiedCorporateOfficerWriteConverter implements Converter<Cor
         try {
             return BasicDBObject.parse(objectMapper.writeValueAsString(source));
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new InternalServerErrorException("failed to convert JSON to BasicDBObject object", ex);
         }
     }
 }

@@ -1,10 +1,13 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
 
 @ReadingConverter
 public class DisqualifiedCorporateOfficerReadConverter implements Converter<Document, CorporateDisqualificationApi> {
@@ -25,7 +28,7 @@ public class DisqualifiedCorporateOfficerReadConverter implements Converter<Docu
         try {
             return objectMapper.readValue(source.toJson(), CorporateDisqualificationApi.class);
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new InternalServerErrorException("failed to convert JSON to CorporateDisqualificationApi object", ex);
         }
     }
 }
