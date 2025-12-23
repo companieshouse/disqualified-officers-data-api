@@ -20,16 +20,16 @@
         </start-class>
 
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
-        <spring-boot-starter.version>3.5.3</spring-boot-starter.version>
+        <spring-boot-starter.version>3.5.7</spring-boot-starter.version>
         <spring-context.version>6.2.7</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <tomcat-embed-core.version>11.0.8</tomcat-embed-core.version>
+        <tomcat-embed-core.version>11.0.15</tomcat-embed-core.version>
         <spring-web.version>6.2.8</spring-web.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <opentelemetry-instrumentation-bom.version>2.14.0</opentelemetry-instrumentation-bom.version>
-        <apache-commons-lang3.version>3.18.0</apache-commons-lang3.version>
+        <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
         <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
 
         <!-- tests -->
@@ -43,10 +43,10 @@
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.36</structured-logging.version>
+        <structured-logging.version>3.0.43</structured-logging.version>
         <private-api-sdk-java.version>4.0.316</private-api-sdk-java.version>
-        <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
-        <api-helper-java.version>3.0.1</api-helper-java.version>
+        <api-sdk-manager-java-library.version>3.0.14</api-sdk-manager-java-library.version>
+        <api-helper-java.version>3.0.3</api-helper-java.version>
         <api-security-java.version>2.0.8</api-security-java.version>
 
         <!--sonar configuration-->
