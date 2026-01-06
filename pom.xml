@@ -20,7 +20,7 @@
         </start-class>
 
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
-        <spring-boot-starter.version>3.5.7</spring-boot-starter.version>
+        <spring-boot-starter.version>3.5.9</spring-boot-starter.version>
         <spring-context.version>6.2.7</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <tomcat-embed-core.version>11.0.15</tomcat-embed-core.version>
@@ -43,7 +43,7 @@
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.45</structured-logging.version>
+        <structured-logging.version>3.0.36</structured-logging.version>
         <private-api-sdk-java.version>4.0.316</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.14</api-sdk-manager-java-library.version>
         <api-helper-java.version>3.0.3</api-helper-java.version>
