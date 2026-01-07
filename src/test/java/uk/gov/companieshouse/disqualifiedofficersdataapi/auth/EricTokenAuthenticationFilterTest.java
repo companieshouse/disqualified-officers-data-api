@@ -4,17 +4,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.io.IOException;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
 class EricTokenAuthenticationFilterTest {
@@ -32,33 +36,25 @@ class EricTokenAuthenticationFilterTest {
     void setup() {
         ericTokenAuthenticationFilter = new EricTokenAuthenticationFilter();
     }
-
-    @Test
-    @DisplayName("OAUTH2 GET request passes filter")
-    void doFilterInternal() throws ServletException, IOException {
+    
+    @ParameterizedTest(name = "{0}")
+    @CsvSource({
+        "OAUTH2 GET request passes filter,OAUTH2,GET,1", 
+        "KEY type GET request passes filter,KEY,GET,1", 
+        "PUT Request with OAUTH2 type fails,OAUTH2,PUT,0",
+        "PUT Request with KEY type with no privileges fails,KEY,PUT,0" 
+        })
+    void doFilterInternal(String name, String ericIdentityType, String requestMethod, int filterChainTimes) throws ServletException, IOException {
 
         when(request.getHeader("ERIC-Identity")).thenReturn("SOME-IDENTITY");
-        when(request.getHeader("ERIC-Identity-Type")).thenReturn("OAUTH2");
-        when(request.getMethod()).thenReturn("GET");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn(ericIdentityType);
+        when(request.getMethod()).thenReturn(requestMethod);
 
         ericTokenAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        verify(filterChain, times(1)).doFilter(request, response);
+        verify(filterChain, times(filterChainTimes)).doFilter(request, response);
     }
-
-    @Test
-    @DisplayName("KEY type GET request passes filter")
-    void doFilterInternalKey() throws ServletException, IOException {
-
-        when(request.getHeader("ERIC-Identity")).thenReturn("SOME-IDENTITY");
-        when(request.getHeader("ERIC-Identity-Type")).thenReturn("KEY");
-        when(request.getMethod()).thenReturn("GET");
-
-        ericTokenAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain, times(1)).doFilter(request, response);
-    }
-
+    
     @Test
     @DisplayName("KEY type GET request with internal app privileges passes filter")
     void doFilterInternalKeyAndInternalApp() throws ServletException, IOException {
@@ -120,38 +116,12 @@ class EricTokenAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("PUT Request with OAUTH2 type fails")
-    void doFilterInternalOauth2WrongMethod() throws ServletException, IOException {
-
-        when(request.getHeader("ERIC-Identity")).thenReturn("SOME-IDENTITY");
-        when(request.getHeader("ERIC-Identity-Type")).thenReturn("OAUTH2");
-        when(request.getMethod()).thenReturn("PUT");
-
-        ericTokenAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain, times(0)).doFilter(request, response);
-    }
-
-    @Test
     @DisplayName("PUT Request with OAUTH2 type and internal app privilege fails")
     void doFilterInternalOauth2WrongMethodWithPrivilege() throws ServletException, IOException {
 
         when(request.getHeader("ERIC-Identity")).thenReturn("SOME-IDENTITY");
         when(request.getHeader("ERIC-Identity-Type")).thenReturn("OAUTH2");
         when(request.getHeader("ERIC-Authorised-Key-Privileges")).thenReturn("internal-app");
-        when(request.getMethod()).thenReturn("PUT");
-
-        ericTokenAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain, times(0)).doFilter(request, response);
-    }
-
-    @Test
-    @DisplayName("PUT Request with KEY type with no privileges fails")
-    void doFilterInternalKeyNoPrivileges() throws ServletException, IOException {
-
-        when(request.getHeader("ERIC-Identity")).thenReturn("SOME-IDENTITY");
-        when(request.getHeader("ERIC-Identity-Type")).thenReturn("KEY");
         when(request.getMethod()).thenReturn("PUT");
 
         ericTokenAuthenticationFilter.doFilterInternal(request, response, filterChain);

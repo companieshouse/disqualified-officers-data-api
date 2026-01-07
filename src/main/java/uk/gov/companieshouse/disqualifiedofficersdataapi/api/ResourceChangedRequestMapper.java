@@ -33,7 +33,7 @@ public class ResourceChangedRequestMapper {
         }
 
         ChangedResourceEvent event = new ChangedResourceEvent();
-        if (request.getIsDelete()) {
+        if (Boolean.TRUE.equals(request.getIsDelete())) {
             event.setType("deleted");
             try {
                 Object disqualificationAsObject = objectMapper.readValue(
