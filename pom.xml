@@ -25,6 +25,7 @@
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <tomcat-embed-core.version>11.0.15</tomcat-embed-core.version>
         <spring-web.version>6.2.8</spring-web.version>
+        <spring-security-core.version>6.5.8</spring-security-core.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -33,6 +34,8 @@
         <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
         <assertj-core.version>3.27.7</assertj-core.version>
         <logback.version>1.5.29</logback.version>
+        <guava.version>33.5.0-android</guava.version>
+        <log4j-api.version>2.25.3</log4j-api.version>
 
         <!-- tests -->
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
@@ -65,7 +68,6 @@
         <sonar.password/>
         <sonar.projectName>disqualified-officers-data-api</sonar.projectName>
         <sonar.projectKey>uk.gov.companieshouse:disqualified-officers-data-api</sonar.projectKey>
-        <spring-security-core.version>6.5.8</spring-security-core.version>
     </properties>
 
     <profiles>
@@ -141,6 +143,18 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j-api.version}</version>
                 <scope>compile</scope>
             </dependency>
         </dependencies>
