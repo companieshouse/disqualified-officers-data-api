@@ -32,6 +32,7 @@
         <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
         <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
         <assertj-core.version>3.27.7</assertj-core.version>
+        <logback.version>1.5.29</logback.version>
 
         <!-- tests -->
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
@@ -129,6 +130,18 @@
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj-core.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+                <scope>compile</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
