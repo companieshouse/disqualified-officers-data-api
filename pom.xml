@@ -68,6 +68,20 @@
         <sonar.password/>
         <sonar.projectName>disqualified-officers-data-api</sonar.projectName>
         <sonar.projectKey>uk.gov.companieshouse:disqualified-officers-data-api</sonar.projectKey>
+        <mockito.version>5.17.0</mockito.version>
+        <google-http-client.version>2.0.1</google-http-client.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
+        <jackson.version>2.19.4</jackson.version>
+        <gson.version>2.13.2</gson.version>
+        <docker-java-api.version>3.4.2</docker-java-api.version>
+        <junit.version>4.13.2</junit.version>
+        <junit-jupiter.version>5.12.2</junit-jupiter.version>
+        <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
+        <hamcrest.version>3.0</hamcrest.version>
+        <api-sdk-java.version>6.2.7</api-sdk-java.version>
+        <aspectjweaver.version>1.9.25.1</aspectjweaver.version>
+        <mongodb-driver-core.version>5.5.2</mongodb-driver-core.version>
+        <bson.version>5.5.2</bson.version>
     </properties>
 
     <profiles>
@@ -268,13 +282,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.17.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
-            <version>2.0.1</version>
+            <version>${google-http-client.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -284,106 +298,106 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>1.21.4</version>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-core</artifactId>
-            <version>5.5.2</version>
+            <version>${mongodb-driver-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.19.4</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
-            <version>3.0</version>
+            <version>${hamcrest.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
-            <version>2.1.1</version>
+            <version>${jakarta.annotation-api.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.19.4</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.12.2</version>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-sdk-java</artifactId>
-            <version>6.2.7</version>
+            <version>${api-sdk-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.9.25.1</version>
+            <version>${aspectjweaver.version}</version>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.27.7</version>
+            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.12.2</version>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.17.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-api</artifactId>
-            <version>3.4.2</version>
+            <version>${docker-java-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>bson</artifactId>
-            <version>5.5.2</version>
+            <version>${bson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
-            <version>11.0.15</version>
+            <version>${tomcat-embed-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.19.4</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.13.2</version>
+            <version>${gson.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.19.4</version>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 
