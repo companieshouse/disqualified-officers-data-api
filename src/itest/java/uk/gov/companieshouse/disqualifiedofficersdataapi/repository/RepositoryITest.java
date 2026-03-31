@@ -5,7 +5,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig;
@@ -21,13 +21,12 @@ class RepositoryITest extends AbstractMongoConfig {
   private NaturalDisqualifiedOfficerRepository naturalRepository;
 
   @BeforeAll
-  static void setup(){
+  static void setup() {
     mongoDBContainer.start();
   }
 
   @Test
   void should_save_and_retrieve_disqualified_officer_data() {
-
     NaturalDisqualificationDocument disqualificationDocument = createDisqualificationDocument("1234567890");
     naturalRepository.save(disqualificationDocument);
 
@@ -40,15 +39,13 @@ class RepositoryITest extends AbstractMongoConfig {
     NaturalDisqualificationApi data = new NaturalDisqualificationApi();
     disqualificationDocument.setDeltaAt(OffsetDateTime.now().toString());
     disqualificationDocument.setId(officerId);
-
     disqualificationDocument.setData(data);
 
     return disqualificationDocument;
   }
 
   @AfterAll
-  static void tear(){
+  static void tear() {
     mongoDBContainer.stop();
   }
-
 }
