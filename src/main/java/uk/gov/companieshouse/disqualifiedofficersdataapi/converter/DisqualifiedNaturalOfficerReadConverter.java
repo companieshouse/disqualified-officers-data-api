@@ -1,9 +1,10 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
+
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;
 

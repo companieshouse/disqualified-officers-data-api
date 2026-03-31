@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.serialization;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +12,8 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+
+import tools.jackson.core.JsonGenerator;
 
 @ExtendWith(MockitoExtension.class)
 class LocalDateSerializerTest {

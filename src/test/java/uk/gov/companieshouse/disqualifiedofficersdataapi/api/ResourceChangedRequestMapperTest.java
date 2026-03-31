@@ -8,8 +8,8 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+// ...existing code...
+import tools.jackson.databind.ObjectMapper;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -67,7 +67,7 @@ class ResourceChangedRequestMapperTest {
 
     @ParameterizedTest
     @MethodSource("resourceDeletedScenarios")
-    void testMapperDeleted(ResourceChangedTestArgument argument) throws Exception {
+    void testMapperDeleted(ResourceChangedTestArgument argument) {
         // given
         String serialisedData = "serialisedData";
         when(timestampGenerator.get()).thenReturn(DATE);
@@ -94,9 +94,9 @@ class ResourceChangedRequestMapperTest {
     }
 
     @Test
-    void testMapperThrowsSerDesExceptionIfObjectMapperWriteFails() throws Exception {
+    void testMapperThrowsSerDesExceptionIfObjectMapperWriteFails() {
         // given
-        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+        when(objectMapper.writeValueAsString(any())).thenThrow(new tools.jackson.core.JacksonException("mock error") {});
 
         // when
         Executable actual = () -> mapper.mapChangedResource(
@@ -111,7 +111,7 @@ class ResourceChangedRequestMapperTest {
     void testMapperThrowsSerDesExceptionIfObjectMapperReadFails() throws Exception {
         // given
         when(objectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
-        when(objectMapper.readValue(anyString(), eq(Object.class))).thenThrow(JsonProcessingException.class);
+        when(objectMapper.readValue(anyString(), eq(Object.class))).thenThrow(new tools.jackson.core.JacksonException("mock error") {});
 
         // when
         Executable actual = () -> mapper.mapChangedResource(

@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -9,17 +7,16 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractIntegrationTest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.CucumberContext;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.CorporateDisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
@@ -30,12 +27,10 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.util.FileReaderUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
-public class CorporateDisqualificationSteps {
+public class CorporateDisqualificationSteps extends AbstractIntegrationTest {
 
     private String contextId;
 
@@ -43,7 +38,7 @@ public class CorporateDisqualificationSteps {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private WebTestClient webTestClient;
 
     @Autowired
     private NaturalDisqualifiedOfficerRepository naturalRepository;
@@ -61,10 +56,8 @@ public class CorporateDisqualificationSteps {
     public DisqualifiedOfficerApiService disqualifiedApiService;
 
     @Before
-    public void dbCleanUp(){
-        if (!mongoDBContainer.isRunning()) {
-            mongoDBContainer.start();
-        }
+    public void dbCleanUp() {
+        startMongo();
         repository.deleteAll();
         naturalRepository.deleteAll();
         corporateRepository.deleteAll();
@@ -93,55 +86,57 @@ public class CorporateDisqualificationSteps {
         corporateDisqualification.setDeltaAt(deltaAt);
 
         mongoTemplate.save(corporateDisqualification);
-        CucumberContext.CONTEXT.set("disqualificationData",corporateDisqualification);
+        CucumberContext.CONTEXT.set("disqualificationData", corporateDisqualification);
     }
 
     @When("I send corporate GET request with officer Id {string}")
     public void i_send_corporate_get_request_with_officer_id(String officerId) {
-        String uri = "/disqualified-officers/corporate/{officerId}";
+        CorporateDisqualificationApi responseBody = webTestClient.get()
+                .uri("/disqualified-officers/corporate/{officerId}", officerId)
+                .header("ERIC-Identity", "TEST-IDENTITY")
+                .header("ERIC-Identity-Type", "KEY")
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(CorporateDisqualificationApi.class)
+                .getResponseBody()
+                .blockFirst();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        HttpEntity<String> request = new HttpEntity<String>(null, headers);
-
-        ResponseEntity<CorporateDisqualificationApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
-                CorporateDisqualificationApi.class, officerId);
-
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
-        CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
+        CucumberContext.CONTEXT.set("statusCode", 200);
+        CucumberContext.CONTEXT.set("getResponseBody", responseBody);
     }
-
 
     @When("I send corporate PUT request with payload {string} file")
     public void i_send_corporate_put_request_with_payload(String dataFile) {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/" + dataFile + ".json");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
         this.contextId = "5234234234";
         CucumberContext.CONTEXT.set("contextId", this.contextId);
-        headers.set("x-request-id", this.contextId);
-        headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
-
-        HttpEntity<String> request = new HttpEntity<>(data, headers);
-        String uri = "/disqualified-officers/corporate/{officerId}/internal";
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.CORPORATE);
-        String officerId = "1234567891";
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
+        String officerId = "1234567891";
+
+        int statusCode = webTestClient.put()
+                .uri("/disqualified-officers/corporate/{officerId}/internal", officerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("x-request-id", this.contextId)
+                .header("ERIC-Identity", "TEST-IDENTITY")
+                .header("ERIC-Identity-Type", "KEY")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .bodyValue(data)
+                .exchange()
+                .returnResult(Void.class)
+                .getStatus()
+                .value();
+
+        CucumberContext.CONTEXT.set("statusCode", statusCode);
     }
 
     @Then("the corporate Get call response body should match {string} file")
     public void the_corporate_get_call_response_body_should_match(String dataFile) throws IOException {
-       File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
-       CorporateDisqualificationApi expected = objectMapper.readValue(file, CorporateDisqualificationApi.class);
-       expected.setKind(KindEnum.CORPORATE_DISQUALIFICATION);
+        File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
+        CorporateDisqualificationApi expected = objectMapper.readValue(file, CorporateDisqualificationApi.class);
+        expected.setKind(KindEnum.CORPORATE_DISQUALIFICATION);
 
         CorporateDisqualificationApi actual = CucumberContext.CONTEXT.get("getResponseBody");
 
@@ -160,10 +155,4 @@ public class CorporateDisqualificationSteps {
         Assertions.assertEquals(expected.getId(), actual.getId());
         Assertions.assertEquals(expected.isCorporateOfficer(), actual.isCorporateOfficer());
     }
-
-    @After
-    public void dbStop(){
-        mongoDBContainer.stop();
-    }
-
 }

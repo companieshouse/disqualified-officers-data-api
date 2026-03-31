@@ -1,22 +1,22 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.ResourceChangedRequest;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractIntegrationTest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.CucumberContext;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.ServiceUnavailableException;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationDocument;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.CorporateDisqualifiedOfficerRepository;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.DisqualifiedOfficerRepository;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.repository.NaturalDisqualifiedOfficerRepository;
 
 import java.util.List;
 
@@ -25,9 +25,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
-public class DisqualificationSteps {
+public class DisqualificationSteps extends AbstractIntegrationTest {
 
     private static final String DELTA_AT = "20240925171003950844";
     private static final String STALE_DELTA_AT = "20220925171003950844";
@@ -35,84 +34,102 @@ public class DisqualificationSteps {
     private static final String DELETE_NATURAL_URI = "/disqualified-officers/natural/{officer_id}/internal";
 
     @Autowired
+    private NaturalDisqualifiedOfficerRepository naturalRepository;
+
+    @Autowired
+    private CorporateDisqualifiedOfficerRepository corporateRepository;
+
+    @Autowired
     public DisqualifiedOfficerApiService disqualifiedApiService;
 
     @Autowired
-    protected TestRestTemplate restTemplate;
+    private WebTestClient webTestClient;
 
     @Autowired
     private DisqualifiedOfficerRepository repository;
 
+    @Before
+    public void dbCleanUp() {
+        startMongo();
+        repository.deleteAll();
+    }
+
     @Given("disqualified officers data api service is running")
     public void theApplicationRunning() {
-        assertThat(restTemplate).isNotNull();
+        assertThat(webTestClient).isNotNull();
     }
 
     @Given("the disqualification database is down")
     public void the_disqualification_db_is_down() {
-        mongoDBContainer.stop();
+        stopMongo();
     }
 
     @When("CHS kafka API service is unavailable")
     public void chs_kafka_service_unavailable() {
         doThrow(ServiceUnavailableException.class)
-            .when(disqualifiedApiService).invokeChsKafkaApi(any(ResourceChangedRequest.class));
+                .when(disqualifiedApiService).invokeChsKafkaApi(any(ResourceChangedRequest.class));
     }
 
     @When("I send DELETE request with officer id {string}")
     public void send_delete_request_for_officer(String officerId) {
-        HttpHeaders headers = new HttpHeaders();
         CucumberContext.CONTEXT.set("contextId", "5234234234");
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
-        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
-        headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
-        headers.set(X_DELTA_AT, DELTA_AT);
 
-        HttpEntity<String> request = new HttpEntity<>(null, headers);
+        int statusCode = webTestClient.delete()
+                .uri(DELETE_NATURAL_URI, officerId)
+                .header("x-request-id", (String) CucumberContext.CONTEXT.get("contextId"))
+                .header("ERIC-Identity", "TEST-IDENTITY")
+                .header("ERIC-Identity-Type", "KEY")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header(X_DELTA_AT, DELTA_AT)
+                .exchange()
+                .returnResult(Void.class)
+                .getStatus()
+                .value();
 
-        ResponseEntity<Void> response = restTemplate.exchange(DELETE_NATURAL_URI, HttpMethod.DELETE, request, Void.class, officerId);
-
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
+        CucumberContext.CONTEXT.set("statusCode", statusCode);
     }
 
     @When("I send DELETE request with officer id {string} with a stale delta at")
     public void send_delete_request_for_officer_stale_delta_at(String officerId) {
-        HttpHeaders headers = new HttpHeaders();
         CucumberContext.CONTEXT.set("contextId", "5234234234");
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
-        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
-        headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
-        headers.set(X_DELTA_AT, STALE_DELTA_AT);
 
-        HttpEntity<String> request = new HttpEntity<>(null, headers);
+        int statusCode = webTestClient.delete()
+                .uri(DELETE_NATURAL_URI, officerId)
+                .header("x-request-id", (String) CucumberContext.CONTEXT.get("contextId"))
+                .header("ERIC-Identity", "TEST-IDENTITY")
+                .header("ERIC-Identity-Type", "KEY")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header(X_DELTA_AT, STALE_DELTA_AT)
+                .exchange()
+                .returnResult(Void.class)
+                .getStatus()
+                .value();
 
-        ResponseEntity<Void> response = restTemplate.exchange(DELETE_NATURAL_URI, HttpMethod.DELETE, request, Void.class, officerId);
-
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
+        CucumberContext.CONTEXT.set("statusCode", statusCode);
     }
 
     @When("I send DELETE request with an invalid officer_type and officer id {string}")
     public void send_delete_request_for_officer_with_invalid_officer_type(String officerId) {
         String uri = "/disqualified-officers/invalid/{officer_id}/internal";
 
-        HttpHeaders headers = new HttpHeaders();
         CucumberContext.CONTEXT.set("contextId", "5234234234");
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
-        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
-        headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
-        headers.set(X_DELTA_AT, DELTA_AT);
 
-        HttpEntity<String> request = new HttpEntity<>(null, headers);
+        int statusCode = webTestClient.delete()
+                .uri(uri, officerId)
+                .header("x-request-id", (String) CucumberContext.CONTEXT.get("contextId"))
+                .header("ERIC-Identity", "TEST-IDENTITY")
+                .header("ERIC-Identity-Type", "KEY")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .header(X_DELTA_AT, DELTA_AT)
+                .exchange()
+                .returnResult(Void.class)
+                .getStatus()
+                .value();
 
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class, officerId);
-
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
+        CucumberContext.CONTEXT.set("statusCode", statusCode);
     }
 
     @When("officer id does not exists for {string}")
@@ -130,11 +147,11 @@ public class DisqualificationSteps {
         boolean isDelete = officerId.equals("id_to_delete");
 
         verify(disqualifiedApiService).invokeChsKafkaApi(new ResourceChangedRequest(
-            CucumberContext.CONTEXT.get("contextId"),
-            officerId,
-            CucumberContext.CONTEXT.get("officerType"),
-            isDelete ? CucumberContext.CONTEXT.get("disqualificationData") : null,
-            isDelete
+                CucumberContext.CONTEXT.get("contextId"),
+                officerId,
+                CucumberContext.CONTEXT.get("officerType"),
+                isDelete ? CucumberContext.CONTEXT.get("disqualificationData") : null,
+                isDelete
         ));
     }
 
@@ -171,5 +188,4 @@ public class DisqualificationSteps {
     public void disqualified_officer_exists(String officerId) {
         Assertions.assertThat(repository.existsById(officerId)).isFalse();
     }
-
 }
