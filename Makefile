@@ -25,7 +25,7 @@ test: clean test-integration test-unit
 
 .PHONY: test-unit
 test-unit:
-	mvn test -Dskip.integration.tests=false
+	mvn test -Dskip.integration.tests=true
 
 .PHONY: test-integration
 test-integration:
