@@ -21,11 +21,8 @@
 
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
         <spring-boot-starter.version>4.0.4</spring-boot-starter.version>
-        <spring-context.version>6.2.7</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <tomcat-embed-core.version>11.0.18</tomcat-embed-core.version>
-        <spring-web.version>6.2.17</spring-web.version>
-        <spring-security-core.version>6.5.8</spring-security-core.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -96,24 +93,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- Removed explicit Spring Framework dependencies to avoid version conflicts. Let Spring Boot BOM manage these. -->
-            <!--
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-core</artifactId>
-                <version>${spring-security-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring-context.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring-web.version}</version>
-            </dependency>
-            -->
             <dependency>
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
@@ -192,7 +171,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- JUnit Jupiter (JUnit 5) for Cucumber and modern Spring Boot -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -326,11 +304,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-suite</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-spring</artifactId>
             <version>${io-cucumber.version}</version>
@@ -386,9 +359,6 @@
                 <configuration>
                     <argLine>-Dfile.encoding=UTF-8</argLine>
                     <argLine>${surefireArgLine}</argLine>
-<!--                    <excludes>-->
-<!--                        <exclude>**/*ITest.java</exclude>-->
-<!--                    </excludes>-->
                     <skipTests>${skip.unit.tests}</skipTests>
                 </configuration>
             </plugin>
