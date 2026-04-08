@@ -8,15 +8,6 @@ Feature: Delete disqualification information
     Then I should receive 200 status code
     And the CHS Kafka API is invoked with "id_to_delete"
 
-  Scenario: Delete disqualified officer information while database is down
-
-    Given disqualified officers data api service is running
-    And the natural disqualified officer information exists for "1234567890"
-    And the disqualification database is down
-    When I send DELETE request with officer id "1234567891"
-    Then I should receive 503 status code
-    And the CHS Kafka API is not invoked
-
   Scenario: Delete disqualified officer information not found
 
     Given disqualified officers data api service is running
@@ -48,4 +39,22 @@ Feature: Delete disqualification information
     And the natural disqualified officer information exists for "id_to_delete"
     When I send DELETE request with an invalid officer_type and officer id "id_to_delete"
     Then I should receive 400 status code
+    And the CHS Kafka API is not invoked
+
+  # This scenario must be the very last test in the feature file.
+  #
+  # Reason: Stopping or simulating the MongoDB database being down in this scenario causes the Spring context and MongoDB connection to become invalid for subsequent tests. Previous attempts to restart the container or refresh the context mid-suite led to issues such as:
+  #   - Endless loops or timeouts waiting for MongoDB readiness
+  #   - Invalid or missing MongoDB connection strings, causing ApplicationContext failures
+  #   - Beans (e.g., MongoTemplate) pointing to dead connections
+  #   - Expensive context refreshes with @DirtiesContext
+  #
+  # By placing this scenario last, we ensure that database-down state does not affect other tests, maintaining test isolation and reliability.
+  Scenario: Delete disqualified officer information while database is down
+
+    Given disqualified officers data api service is running
+    And the natural disqualified officer information exists for "1234567890"
+    And the disqualification database is down
+    When I send DELETE request with officer id "1234567891"
+    Then I should receive 503 status code
     And the CHS Kafka API is not invoked

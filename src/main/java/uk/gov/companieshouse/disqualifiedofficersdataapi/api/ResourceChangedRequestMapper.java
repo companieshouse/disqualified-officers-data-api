@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.util.function.Supplier;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
@@ -40,7 +40,7 @@ public class ResourceChangedRequestMapper {
                         objectMapper.writeValueAsString(request.getDisqualificationData()), Object.class
                 );
                 changedResource.setDeletedData(disqualificationAsObject);
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 throw new SerDesException("Failed to serialise/deserialise data", ex);
             }
         } else {

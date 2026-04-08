@@ -1,25 +1,23 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.steps;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi.KindEnum;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficerApiService;
+import uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractIntegrationTest;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.config.CucumberContext;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.DisqualificationResourceType;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualificationDocument;
@@ -30,41 +28,41 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.util.FileReaderUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.companieshouse.disqualifiedofficersdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
-public class NaturalDisqualificationSteps {
+public class NaturalDisqualificationSteps extends AbstractIntegrationTest {
 
     private String contextId;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private final WebTestClient webTestClient;
+    private final NaturalDisqualifiedOfficerRepository naturalRepository;
+    private final CorporateDisqualifiedOfficerRepository corporateRepository;
+    private final DisqualifiedOfficerRepository repository;
+    private final MongoTemplate mongoTemplate;
+    public final DisqualifiedOfficerApiService disqualifiedApiService;
 
     @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
-    private NaturalDisqualifiedOfficerRepository naturalRepository;
-
-    @Autowired
-    private CorporateDisqualifiedOfficerRepository corporateRepository;
-
-    @Autowired
-    private DisqualifiedOfficerRepository repository;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    public DisqualifiedOfficerApiService disqualifiedApiService;
+    public NaturalDisqualificationSteps(ObjectMapper objectMapper,
+                                        WebTestClient webTestClient,
+                                        NaturalDisqualifiedOfficerRepository naturalRepository,
+                                        CorporateDisqualifiedOfficerRepository corporateRepository,
+                                        DisqualifiedOfficerRepository repository,
+                                        MongoTemplate mongoTemplate,
+                                        DisqualifiedOfficerApiService disqualifiedApiService) {
+        this.objectMapper = objectMapper;
+        this.webTestClient = webTestClient;
+        this.naturalRepository = naturalRepository;
+        this.corporateRepository = corporateRepository;
+        this.repository = repository;
+        this.mongoTemplate = mongoTemplate;
+        this.disqualifiedApiService = disqualifiedApiService;
+    }
 
     @Before
-    public void dbCleanUp(){
-        if (!mongoDBContainer.isRunning()) {
-            mongoDBContainer.start();
-        }
+    public void dbCleanUp() {
+        startMongo();
         repository.deleteAll();
         naturalRepository.deleteAll();
         corporateRepository.deleteAll();
@@ -99,64 +97,69 @@ public class NaturalDisqualificationSteps {
 
     @When("I send natural GET request with officer Id {string}")
     public void i_send_natural_get_request_with_officer_id(String officerId) {
-        String uri = "/disqualified-officers/natural/{officerId}";
+        NaturalDisqualificationApi responseBody = webTestClient.get()
+                .uri("/disqualified-officers/natural/{officerId}", officerId)
+                .header("ERIC-Identity", "TEST-IDENTITY")
+                .header("ERIC-Identity-Type", "KEY")
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(NaturalDisqualificationApi.class)
+                .getResponseBody()
+                .blockFirst();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        HttpEntity<String> request = new HttpEntity<String>(null, headers);
-
-        ResponseEntity<NaturalDisqualificationApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
-                NaturalDisqualificationApi.class, officerId);
-
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
-        CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
+        CucumberContext.CONTEXT.set("statusCode", 200);
+        CucumberContext.CONTEXT.set("getResponseBody", responseBody);
     }
-
 
     @When("I send natural PUT request with payload {string} file")
     public void i_send_natural_put_request_with_payload(String dataFile) {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/" + dataFile + ".json");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
         this.contextId = "5234234234";
         CucumberContext.CONTEXT.set("contextId", this.contextId);
-        headers.set("x-request-id", this.contextId);
-        headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
-
-        HttpEntity<String> request = new HttpEntity<String>(data, headers);
-        String uri = "/disqualified-officers/natural/{officerId}/internal";
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
-        String officerId = "1234567890";
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
+        String officerId = "1234567890";
+
+        int statusCode = webTestClient.put()
+                .uri("/disqualified-officers/natural/{officerId}/internal", officerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("x-request-id", this.contextId)
+                .header("ERIC-Identity", "TEST-IDENTITY")
+                .header("ERIC-Identity-Type", "KEY")
+                .header("ERIC-Authorised-Key-Privileges", "internal-app")
+                .bodyValue(data)
+                .exchange()
+                .returnResult(Void.class)
+                .getStatus()
+                .value();
+
+        CucumberContext.CONTEXT.set("statusCode", statusCode);
     }
 
     @When("I send natural PUT request without ERIC headers")
     public void i_send_natural_put_request_without_ERIC_headers() {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/natural_disqualified_officer.json");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
         this.contextId = "5234234234";
         CucumberContext.CONTEXT.set("contextId", this.contextId);
-        headers.set("x-request-id", this.contextId);
-
-        HttpEntity<String> request = new HttpEntity<String>(data, headers);
-        String uri = "/disqualified-officers/natural/{officerId}/internal";
         CucumberContext.CONTEXT.set("officerType", DisqualificationResourceType.NATURAL);
-        String officerId = "1234567890";
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, officerId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
+        String officerId = "1234567890";
+
+        int statusCode = webTestClient.put()
+                .uri("/disqualified-officers/natural/{officerId}/internal", officerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("x-request-id", this.contextId)
+                .bodyValue(data)
+                .exchange()
+                .returnResult(Void.class)
+                .getStatus()
+                .value();
+
+        CucumberContext.CONTEXT.set("statusCode", statusCode);
     }
 
     @Then("the natural Get call response body should match {string} file")
@@ -182,10 +185,4 @@ public class NaturalDisqualificationSteps {
         Assertions.assertEquals(expected.getDeltaAt(), actual.getDeltaAt());
         Assertions.assertEquals(expected.getId(), actual.getId());
     }
-
-    @After
-    public void dbStop(){
-        mongoDBContainer.stop();
-    }
-
 }

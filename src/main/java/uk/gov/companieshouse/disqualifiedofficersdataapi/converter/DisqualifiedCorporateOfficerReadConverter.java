@@ -4,7 +4,7 @@ import org.bson.Document;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.InternalServerErrorException;

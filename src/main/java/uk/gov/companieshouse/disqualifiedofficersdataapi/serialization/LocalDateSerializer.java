@@ -1,18 +1,21 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.serialization;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateSerializer extends JsonSerializer<LocalDate> {
+public class LocalDateSerializer extends StdSerializer<LocalDate> {
+
+    public LocalDateSerializer() {
+        super(LocalDate.class);
+    }
 
     @Override
     public void serialize(LocalDate localDate, JsonGenerator jsonGenerator,
-                          SerializerProvider serializerProvider) throws IOException {
+                          SerializationContext serializationContext) {
         if (localDate == null) {
             jsonGenerator.writeNull();
         } else {

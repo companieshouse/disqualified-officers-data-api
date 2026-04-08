@@ -18,25 +18,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.dockerjava.api.exception.InternalServerErrorException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.disqualification.InternalDisqualificationApiInternalData;
 import uk.gov.companieshouse.api.disqualification.InternalNaturalDisqualificationApi;
 import uk.gov.companieshouse.api.disqualification.NaturalDisqualificationApi;
@@ -52,7 +47,6 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.model.NaturalDisqualifi
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DeleteDisqualifiedOfficerService;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.service.DisqualifiedOfficerService;
 
-@ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = DisqualifiedOfficerController.class)
 @ContextConfiguration(classes = {DisqualifiedOfficerController.class, ExceptionHandlerConfig.class})
 @Import({WebSecurityConfig.class})
@@ -63,7 +57,7 @@ class DisqualifiedOfficerControllerTest {
     private static final String CORPORATE = "corporate";
     private static final String NATURAL_URL = String.format("/disqualified-officers/%s/%s/internal", NATURAL, OFFICER_ID);
     private static final String NATURAL_GET_URL = String.format("/disqualified-officers/%s/%s", NATURAL, OFFICER_ID);
-    private static final String DELETE_NATURAL_URL = String.format("/disqualified-officers/%s/%s/internal", NATURAL,OFFICER_ID);
+    private static final String DELETE_NATURAL_URL = String.format("/disqualified-officers/%s/%s/internal", NATURAL, OFFICER_ID);
     private static final String DELETE_CORPORATE_URL = String.format("/disqualified-officers/%s/%s/internal", CORPORATE, OFFICER_ID);
     private static final String DELTA_AT = "20240925171003950844";
     private static final String STALE_DELTA_AT = "20220925171003950844";
@@ -80,17 +74,9 @@ class DisqualifiedOfficerControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
     private final Gson gson = new GsonBuilder().setPrettyPrinting()
             .excludeFieldsWithoutExposeAnnotation()
             .create();
-
-    @BeforeEach
-    void setUp() {
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    }
 
     @Test
     @DisplayName("Disqualified Officer PUT request")
@@ -189,7 +175,6 @@ class DisqualifiedOfficerControllerTest {
                         .content(gson.toJson(request)))
                 .andExpect(status().isForbidden());
     }
-
 
     @Test
     @DisplayName("Disqualified Officer PUT request - NotFoundException 404 not found")
@@ -361,7 +346,6 @@ class DisqualifiedOfficerControllerTest {
     @Test
     @DisplayName("Disqualified Officer DELETE request - ServiceUnavailable status code 503")
     void callDisqualifiedOfficerDeleteRequestServiceUnavailable() throws Exception {
-
         doThrow(new ServiceUnavailableException("Service Unavailable - connection issues"))
                 .when(deleteService).deleteDisqualification(any());
 
@@ -378,7 +362,6 @@ class DisqualifiedOfficerControllerTest {
     @Test
     @DisplayName("Disqualified Officer DELETE request - Stale Delta At - Conflict status code 409")
     void callDisqualifiedOfficerDeleteRequestConflict() throws Exception {
-
         doThrow(new ConflictException("Stale delta at"))
                 .when(deleteService).deleteDisqualification(any());
 
@@ -395,7 +378,6 @@ class DisqualifiedOfficerControllerTest {
     @Test
     @DisplayName("Disqualified Officer DELETE request - No Delta At on Header - Bad request status code 400")
     void callDisqualifiedOfficerDeleteRequestBadRequest() throws Exception {
-
         doNothing()
                 .when(deleteService).deleteDisqualification(any());
 
@@ -465,11 +447,9 @@ class DisqualifiedOfficerControllerTest {
     @Test
     @DisplayName("Disqualified Officer OPTIONS request - CORS")
     void callDisqualifiedOfficerOptionsRequestCORS() throws Exception {
-
         mockMvc.perform(options(NATURAL_GET_URL)
                         .contentType(APPLICATION_JSON)
-                        .header("Origin", "")
-                )
+                        .header("Origin", ""))
                 .andExpect(status().isNoContent())
                 .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN))
                 .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
@@ -494,8 +474,7 @@ class DisqualifiedOfficerControllerTest {
                         .header("ERIC-Allowed-Origin", "some-origin")
                         .header("x-request-id", "5342342")
                         .header("ERIC-Identity", "SOME_IDENTITY")
-                        .header("ERIC-Identity-Type", "key")
-                )
+                        .header("ERIC-Identity-Type", "key"))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, containsString("GET")))
@@ -508,7 +487,6 @@ class DisqualifiedOfficerControllerTest {
     @Test
     @DisplayName("Forbidden Disqualified Officer GET request - CORS")
     void getCompanyExemptionsForbiddenCORS() throws Exception {
-
         mockMvc.perform(get(NATURAL_GET_URL)
                         .contentType(APPLICATION_JSON)
                         .header("Origin", "")
@@ -548,5 +526,4 @@ class DisqualifiedOfficerControllerTest {
                 .andExpect(content().string(""))
                 .andReturn();
     }
-
 }

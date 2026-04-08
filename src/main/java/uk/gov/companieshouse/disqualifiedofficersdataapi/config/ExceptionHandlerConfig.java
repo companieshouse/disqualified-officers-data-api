@@ -32,7 +32,7 @@ public class ExceptionHandlerConfig {
 
     private static final String TIMESTAMP = "timestamp";
     private static final String MESSAGE = "message";
-    private static final String ATTRIBUTE = "javax.servlet.error.exception";
+    private static final String ATTRIBUTE = "jakarta.servlet.error.exception";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 

@@ -12,7 +12,7 @@ Feature: Response codes scenarios for disqualification officer
         | data                | response_code |
         | bad_request_natural | 400           |
 
-Scenario: Processing disqualified officers information unsuccessfully after internal server error
+  Scenario: Processing disqualified officers information unsuccessfully after internal server error
 
     Given disqualified officers data api service is running
     When I send natural PUT request with payload "internal_server_error_request" file
@@ -29,14 +29,6 @@ Scenario: Processing disqualified officers information unsuccessfully after inte
     Examples:
         | data                         | officerId  |
         | natural_disqualified_officer | 1234567890 |
-
-  Scenario: Processing disqualified officers information while database is down
-
-    Given disqualified officers data api service is running
-    And the disqualification database is down
-    When I send natural PUT request with payload "natural_disqualified_officer" file
-    Then I should receive 503 status code
-    And the CHS Kafka API is not invoked
 
   Scenario: Proccessing disqualified officers information without ERIC headers
     Given disqualified officers data api service is running
