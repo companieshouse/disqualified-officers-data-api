@@ -23,7 +23,8 @@
         <spring-boot-starter.version>3.5.14</spring-boot-starter.version>
         <spring-context.version>6.2.18</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <tomcat-embed-core.version>11.0.21</tomcat-embed-core.version>
+        <tomcat-embed-core.version>11.0.22</tomcat-embed-core.version>
+        <tomcat-embed-websocket.version>11.0.22</tomcat-embed-websocket.version>
         <spring-web.version>6.2.18</spring-web.version>
         <spring-security-core.version>6.5.10</spring-security-core.version>
 
@@ -38,7 +39,6 @@
         <log4j-api.version>2.25.4</log4j-api.version>
         <io.grpc.version>1.80.0</io.grpc.version>
         <kotlin-lib.version>2.2.21</kotlin-lib.version>
-        <okhttp.version>5.3.2</okhttp.version>
 
         <!-- tests -->
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
@@ -171,7 +171,18 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
                 <version>${kotlin-lib.version}</version>
-                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk7</artifactId>
+                <version>${kotlin-lib.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <version>${kotlin-lib.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -372,9 +383,9 @@
             <version>${apache-commons-lang3.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>${okhttp.version}</version>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>${tomcat-embed-websocket.version}</version>
         </dependency>
     </dependencies>
 
