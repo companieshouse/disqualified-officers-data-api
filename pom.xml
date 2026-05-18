@@ -46,7 +46,7 @@
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
         <io-cucumber.version>7.23.0</io-cucumber.version>
-        <test-containers.version>1.21.2</test-containers.version>
+        <test-containers.version>1.21.4</test-containers.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
 
@@ -117,6 +117,11 @@
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
                 <version>${tomcat-embed-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat-embed-websocket.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -381,11 +386,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${apache-commons-lang3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-websocket</artifactId>
-            <version>${tomcat-embed-websocket.version}</version>
         </dependency>
     </dependencies>
 
