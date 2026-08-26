@@ -30,7 +30,7 @@
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <opentelemetry-instrumentation-bom.version>2.14.0</opentelemetry-instrumentation-bom.version>
+        <opentelemetry-instrumentation-bom.version>2.31.0</opentelemetry-instrumentation-bom.version>
         <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
         <sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
         <assertj-core.version>3.27.7</assertj-core.version>
@@ -51,7 +51,7 @@
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.36</structured-logging.version>
+        <structured-logging.version>3.0.57</structured-logging.version>
         <private-api-sdk-java.version>4.0.316</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.14</api-sdk-manager-java-library.version>
         <api-helper-java.version>3.0.3</api-helper-java.version>
@@ -84,6 +84,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom</artifactId>
+                <version>${opentelemetry-instrumentation-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -127,13 +134,6 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-web</artifactId>
                 <version>${spring-web.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry.instrumentation</groupId>
-                <artifactId>opentelemetry-instrumentation-bom</artifactId>
-                <version>${opentelemetry-instrumentation-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
