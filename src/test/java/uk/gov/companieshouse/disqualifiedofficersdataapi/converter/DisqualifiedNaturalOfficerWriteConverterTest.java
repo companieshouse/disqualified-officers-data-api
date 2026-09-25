@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.mongodb.BasicDBObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ class DisqualifiedNaturalOfficerWriteConverterTest {
 
     @BeforeEach
     void setUp() {
-        converter = new DisqualifiedNaturalOfficerWriteConverter(new ObjectMapper());
+        converter = new DisqualifiedNaturalOfficerWriteConverter(new JsonMapper());
     }
 
     @Test

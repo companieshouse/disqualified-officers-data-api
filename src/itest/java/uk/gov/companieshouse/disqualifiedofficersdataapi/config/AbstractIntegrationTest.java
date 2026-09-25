@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.config;
 
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -13,6 +14,7 @@ import uk.gov.companieshouse.disqualifiedofficersdataapi.api.DisqualifiedOfficer
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @ActiveProfiles({"test"})
+@AutoConfigureTestRestTemplate
 public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
     @MockitoBean

@@ -6,7 +6,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.12</version>
+        <version>2.1.14</version>
     </parent>
     <artifactId>disqualified-officers-data-api</artifactId>
     <version>unversioned</version>
@@ -15,18 +15,18 @@
 
     <properties>
         <java.version>21</java.version>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
         <start-class>
             uk.gov.companieshouse.disqualifiedofficersdataapi.DisqualifiedOfficersDataApiApplication
         </start-class>
 
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
-        <spring-boot-starter.version>3.5.14</spring-boot-starter.version>
-        <spring-context.version>6.2.18</spring-context.version>
+        <spring-boot-starter.version>4.1.1</spring-boot-starter.version>
+        <spring-context.version>7.0.9</spring-context.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <tomcat-embed-core.version>11.0.22</tomcat-embed-core.version>
-        <tomcat-embed-websocket.version>11.0.22</tomcat-embed-websocket.version>
-        <spring-web.version>6.2.18</spring-web.version>
-        <spring-security-core.version>6.5.10</spring-security-core.version>
+        <tomcat-embed-override.version>11.0.25</tomcat-embed-override.version>
+        <spring-web.version>7.0.9</spring-web.version>
+        <spring-security-core.version>7.0.7</spring-security-core.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -41,8 +41,8 @@
         <kotlin-lib.version>2.2.21</kotlin-lib.version>
 
         <!-- tests -->
-        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.6.0</maven-failsafe-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
         <io-cucumber.version>7.23.0</io-cucumber.version>
@@ -71,6 +71,9 @@
         <sonar.password/>
         <sonar.projectName>disqualified-officers-data-api</sonar.projectName>
         <sonar.projectKey>uk.gov.companieshouse:disqualified-officers-data-api</sonar.projectKey>
+
+        <mongodb-driver-override.version>5.12.0</mongodb-driver-override.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
     </properties>
 
     <profiles>
@@ -84,6 +87,16 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-sync</artifactId>
+                <version>${mongodb-driver-override.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-core</artifactId>
+                <version>${mongodb-driver-override.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-bom</artifactId>
@@ -123,16 +136,16 @@
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
-                <version>${tomcat-embed-core.version}</version>
+                <version>${tomcat-embed-override.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-websocket</artifactId>
-                <version>${tomcat-embed-websocket.version}</version>
+                <version>${tomcat-embed-override.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
+                <artifactId>spring-webmvc</artifactId>
                 <version>${spring-web.version}</version>
             </dependency>
             <dependency>
@@ -192,9 +205,6 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <!--section to provide specific versions of transitive dependencies to avoid vulnerabilities, if any exist-->
-        <!--end transitive dependencies-->
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -211,11 +221,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
@@ -247,6 +257,11 @@
                     <artifactId>log4j-to-slf4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -320,6 +335,10 @@
                     <groupId>commons-lang</groupId>
                     <artifactId>commons-lang</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -358,13 +377,28 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-resttestclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-spring</artifactId>
             <version>${io-cucumber.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mongodb</artifactId>
+            <artifactId>testcontainers-mongodb</artifactId>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -372,11 +406,13 @@
                     <artifactId>commons-compress</artifactId>
                 </exclusion>
             </exclusions>
+            <version>${testcontainers.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
+            <version>${testcontainers.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -422,7 +458,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
                 <configuration>
                     <append>true</append>
                     <destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>

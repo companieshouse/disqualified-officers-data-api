@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.disqualifiedofficersdataapi.serialization;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
 import uk.gov.companieshouse.disqualifiedofficersdataapi.exceptions.BadRequestException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateDeSerializer extends JsonDeserializer<LocalDate> {
+public class LocalDateDeSerializer extends ValueDeserializer<LocalDate> {
     public static final String APPLICATION_NAME_SPACE = "disqualified-officers-data-api";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
@@ -33,8 +33,8 @@ public class LocalDateDeSerializer extends JsonDeserializer<LocalDate> {
              * Otherwise we received a long of milliseconds away from 01/01/1970 and need to return 
              * a LocalDate without dateTimeFormatter.
              */
-            return dateNode.textValue() != null ?
-                    LocalDate.parse(dateNode.textValue(), dateTimeFormatter) :
+            return dateNode.stringValue() != null ?
+                    LocalDate.parse(dateNode.stringValue(), dateTimeFormatter) :
                     LocalDate.ofInstant(Instant.ofEpochMilli(dateNode.get("$numberLong").asLong()), ZoneId.systemDefault());
         } catch (Exception exception) {
             LOGGER.error("Deserialization failed.", exception);
