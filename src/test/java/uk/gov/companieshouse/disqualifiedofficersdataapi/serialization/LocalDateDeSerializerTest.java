@@ -79,6 +79,6 @@ class LocalDateDeSerializerTest {
 
         assertThat(deserializedLocalDate)
                 .isNotNull()
-                .isEqualTo(LocalDate.of(2016, 05, 06));
+                .isEqualTo(LocalDate.of(2016, 5, 6));
     }
 }
