@@ -3,7 +3,7 @@ package uk.gov.companieshouse.disqualifiedofficersdataapi.converter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ class DisqualifiedCorporateOfficerReadConverterTest {
 
     @BeforeEach
     void setUp() {
-        converter = new DisqualifiedCorporateOfficerReadConverter(new ObjectMapper());
+        converter = new DisqualifiedCorporateOfficerReadConverter(new JsonMapper());
     }
 
     @Test
