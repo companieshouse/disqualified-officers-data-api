@@ -45,7 +45,7 @@
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- Internal -->
-        <private-api-sdk-java.version>4.0.316</private-api-sdk-java.version>
+        <private-api-sdk-java.version>7.2.33</private-api-sdk-java.version>
 
         <!--sonar configuration-->
         <sonar.coverage.jacoco.xmlReportPaths>
